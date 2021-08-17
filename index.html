@@ -251,11 +251,7 @@
 			}
 			if(this.assignFlag == true && e.target.dataset.park == 0){
 				var el = document.querySelectorAll('.p_slot');
-				el.forEach(dom_e => {
-					if(dom_e.dataset.park == 0){
-						dom_e.attributes["class"].value = "p_slot"
-					}
-				})
+				this.clearPSlot()
 				e.target.dataset.time = new Date().getTime()
 				e.target.dataset.park = 1
 				e.target.attributes["class"].value = "p_slot parked"
@@ -296,8 +292,20 @@
 		calRate = e => {
 			
 		}
+		
+		clearPSlot = e => {
+			var el = document.querySelectorAll('.p_slot');
+			el.forEach(dom_e => {
+				if(dom_e.dataset.park == 0){
+					dom_e.attributes["class"].value = "p_slot"
+				}
+			})
+		}
 			
 		showEntrancePanel = e => {
+			this.clearPSlot()
+			this.assignFlag = false
+			this.unparkFlag = false
 			this.initZone = e.target.attributes['initzone'].value
 			this.secondZone = e.target.attributes['secondzone'].value
 			document.getElementById('entrance_panel').attributes["class"].value = 'panel show'
@@ -337,7 +345,7 @@
 			var initscan = document.querySelectorAll( q_scan );
 
 			var q2_scan = '#zone_' + this.secondZone.split(',').join(' .p_slot:not([data-park="1"]), #zone_') + ' .p_slot:not([data-park="1"])';
-			var seconscan = document.querySelectorAll( q_scan );
+			var secondscan = document.querySelectorAll( q2_scan );
 			
 			var q3_scan = '.p_slot'
 			
