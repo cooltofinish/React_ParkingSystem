@@ -1,0 +1,640 @@
+<html>
+<head>
+	<title>Parking System</title>
+	<script src="react.development.js"></script>
+	<script src="react-dom.development.js"></script>
+	<script src="babel.min.js"></script>
+	<style>
+	*,body { margin:0px; padding:0px; font-family: Verdana, Arial; }
+	
+	#parking_lot { 
+		position:relative;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		flex-wrap: wrap;
+		width: 100vw;
+		height: 100vh;
+		border: 1px solid #888;
+	}
+	
+	.quad, .zone, .zone_lane {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		width: 45%;
+		height: 45vh;
+		border:1px solid #888;
+	}
+	
+	.quad { width: 46%; }
+	.zone { margin: 0px; justify-content: flex-start; }
+	
+	.zone_lane { 
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		border: 0px solid #444;
+		margin: 0px 20px;
+	}
+	
+	.p_slot {
+		display: block;
+		width: 90%;
+		height: 8%;
+		border: 1px solid #444;
+		margin-top: 5px;
+		margin-bottom: 5px;
+		font: normal 10px Verdana,Arial;
+		text-align: center;
+		cursor:pointer;
+	}
+	
+	.p_slot b{
+		text-transform: capitalize;
+	}
+	
+	.entrance {
+		position:absolute;
+		top: -30px;
+		left: 300px;
+		display:block;
+		width: 100px;
+		height: 30px;
+		border: 1px solid #000;
+		text-align: center;
+	}
+	
+	.booth {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		display:block;
+		width: 30%;
+		height: 100%;
+		background-color: blue;
+	}
+	
+	.booth2 {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		display:block;
+		width: 100%;
+		height: 30%;
+		background-color: blue;
+	}
+	
+	#entrance_2 {
+		position:absolute;
+		top: auto;
+		bottom: -30px;
+		left: calc(50vw - 50px);
+		display:block;
+		width: 100px;
+		height: 30px;
+		border: 1px solid #000;
+	}
+	
+	#entrance_3 {
+		position:absolute;
+		top: calc(50vh - 50px);
+		left: auto;
+		right: 0px;
+		display:block;
+		width: 30px;
+		height: 100px;
+		border: 1px solid #000;
+	}
+	
+	.main_h { 
+		font-family: Verdana, Arial;
+		color:#FFF;
+		background-color:#000;
+		text-align: center;
+	}
+	
+	.main_h small{ 
+		font: bolder 12px Verdana, Arial;
+		color:#FFF;
+	}
+	
+	.main_h button {
+		padding: 5px 16px;
+		border: 1px solid #FFF;
+		background-color: #333;
+		color:#FFF;
+		margin: 10px;
+	}
+	.panel { 
+		display:none;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+	
+	.big_btn {
+		display:block;
+		width: 80%;
+		height: 100px;
+		font: bolder 20px Verdana,Arial;
+		color:#444;
+		background-color: #5DD;
+		text-align:center;
+		line-height: 100px;
+		margin: 10px;
+	}
+	
+	.active {
+		background-color: #3D3;
+	}
+
+	.parked {
+		background-color: #33D;
+	}
+	
+	.flex_row {
+		display:flex !important;
+		flex-direction:row;
+		justify-content: center !important;
+		align-items: center !important;
+	}
+	
+	.flex_row input, .flex_row button {
+		display:block !important;
+		width: 300px;
+		height: 50px;
+		border: 10px;
+	}
+	.flex_row button {
+		width: 200px;
+	}
+	.flex_row input {
+		padding: 10px;
+	}
+	
+	.show { display: flex !important; }
+	.hide { display: none !important; }
+	</style>
+</head>
+<body>	
+	<div id="Main_view"><h1>Script not Loaded</h1></div>
+	<script type="text/babel">
+	function CloseWelcome(){
+		const alt=e=>{ 
+			
+			alert('close ' + e.target.dataset.seed + ' -- ' + e.target.attributes.col.value)
+			e.target.attributes.col.value = ' new set of Column value';
+		}
+		return <button data-code="merging" data-seed="source" col="no_columns" onClick={alt}>Refresh</button>
+	}
+	
+	class Quad extends React.Component{
+		render() {
+			return <div >
+				<h1>Quad </h1>
+			</div>
+		}
+	}
+
+	class ParkingLot extends React.Component{
+		render() {
+			return <div >
+				<h1>Hello Parking Lot</h1>
+			</div>
+		}
+	}
+
+	class ParkingSystem extends React.Component{
+		assignFlag = false
+		
+		unparkFlag = false
+		
+		initZone = ''
+		
+		secondZone = ''
+		
+		showParkSchema2 = e => {
+			var quads = 4
+			var quad_ptr = 1
+			var zones = 2
+			var zone_ptr = 1
+			var lanes = 2
+			var lane_ptr = 1
+			var slots = 10
+			var slot_ptr = 1
+			var size = '1,2,3'.split(',');
+			var size_ptr = 0
+			
+			var entrance = 3
+			var entrance_ptr = 1
+			var pl_attr = {id:'parking_lot'}
+			//var pl = ReactDOM.render(<ParkingLot {...pl_attr} />,document.getElementById('Main_view'))
+			for(var quad in quads){
+				var quad_attr = {id:'quad_' + quad, class:'quad'}
+				//ReactDOM.render(<Quad {...quad_attr} />,document.getElementById('parking_lot'))
+				//ReactDOM.render(<Quad {...quad_attr} />,pl)
+				for(var zone in zones){
+					for(var lane in lanes){
+						for(var slot in slots){
+							
+						}
+					}
+				}
+			}
+		}
+		
+		handleClick = e => {
+			if(this.unparkFlag == false && this.assignFlag == false){
+				alert('slot: ' + e.target.id + ' time: ' + e.target.dataset.time + ' park: ' + e.target.dataset.park + ' size: ' + e.target.dataset.size )
+			}
+			if(this.assignFlag == true && e.target.dataset.park == 0){
+				var el = document.querySelectorAll('.p_slot');
+				el.forEach(dom_e => {
+					if(dom_e.dataset.park == 0){
+						dom_e.attributes["class"].value = "p_slot"
+					}
+				})
+				e.target.dataset.time = new Date().getTime()
+				e.target.dataset.park = 1
+				e.target.attributes["class"].value = "p_slot parked"
+				this.assignFlag = false
+			}
+			if(this.assignFlag == true && e.target.dataset.park == 1){
+				alert('Sorry Space is Taken')
+			}
+			if(this.unparkFlag == true && e.target.dataset.park == 0){
+				alert('Sorry you cannot Unpart an Open Space')
+			}
+			if(this.unparkFlag == true && e.target.dataset.park == 1){
+				var c_time = new Date().getTime()
+				var p_time = e.target.dataset.time
+				var diff = Math.ceil((c_time - p_time) / 3600000)
+				var rate = 40
+				var over = 0
+				var hr_rate = e.target.dataset.size == 'small' ? 20 : (e.target.dataset.size == 'medium' ? 60 : 100 )
+				if(diff > 24){
+					rate = 5000
+					over = diff - 24
+					rate += over * hr_rate
+				} else if(diff > 3) {
+					over = diff - 3
+					rate += over * hr_rate
+				}
+				
+				
+				e.target.dataset.time = 0
+				e.target.dataset.park = 0
+				e.target.attributes["class"].value = "p_slot"
+				this.unparkFlag = false
+				alert("You've successfully UnPark : " + e.target.id + "  Size: " + e.target.dataset.size  + "\r\nTime: " + diff + ' hour  | Rate: ' + rate )
+
+			}
+		}
+		
+		calRate = e => {
+			
+		}
+			
+		showEntrancePanel = e => {
+			this.initZone = e.target.attributes['initzone'].value
+			this.secondZone = e.target.attributes['secondzone'].value
+			document.getElementById('entrance_panel').attributes["class"].value = 'panel show'
+			document.getElementById('parking_lot').attributes["class"].value = 'hide'
+		}
+			
+		showEnteringPanel = e => {
+			this.assignFlag = true
+			this.unparkFlag = false
+			document.getElementById('entrance_panel').attributes["class"].value = 'panel hide'
+			document.getElementById('entering_panel').attributes["class"].value = 'panel show'
+		}
+			
+		showExitPanel = e => {
+			this.assignFlag = false
+			this.unparkFlag = true
+			document.getElementById('entrance_panel').attributes["class"].value = 'panel hide'
+			document.getElementById('exit_panel').attributes["class"].value = 'panel show'
+		}
+			
+		unparkSlot = e => {
+			var el = document.getElementById('exit_parking_code').value
+			document.getElementById(el).attributes["data-park"].value = 0
+			alert("You've successfully UnPark : " + el)
+			document.getElementById('parking_lot').attributes["class"].value = 'show'
+			document.getElementById('exit_panel').attributes["class"].value = 'panel hide'
+		}
+			
+		showParkinglot = e => {
+			document.getElementById('parking_lot').attributes["class"].value = 'show'
+			document.getElementById('exit_panel').attributes["class"].value = 'panel hide'
+		}
+			
+		scanParkingSlot = e => {
+			var size = e.target.dataset.size
+			var q_scan = '#zone_' + this.initZone.split(',').join(' .p_slot:not([data-park="1"]), #zone_') + ' .p_slot:not([data-park="1"])';
+			var initscan = document.querySelectorAll( q_scan );
+
+			var q2_scan = '#zone_' + this.secondZone.split(',').join(' .p_slot:not([data-park="1"]), #zone_') + ' .p_slot:not([data-park="1"])';
+			var seconscan = document.querySelectorAll( q_scan );
+			
+			var q3_scan = '.p_slot'
+			
+			var scan = initscan.length == 0 ? ( secondscan.length == 0 ? q3_scan : q2_scan) : q_scan;
+
+			var el = document.querySelectorAll(scan);
+			el.forEach(dom_e => {
+				if( size == 'small' ){
+					if((dom_e.dataset.size == 'small' || dom_e.dataset.size ==  'medium' || dom_e.dataset.size == 'large') && dom_e.dataset.park == 0){
+						dom_e.attributes["class"].value = "p_slot active"
+					}
+				}
+				if( size == 'medium' ){
+					if(( dom_e.dataset.size ==  'medium' || dom_e.dataset.size == 'large') && dom_e.dataset.park == 0){
+						dom_e.attributes["class"].value = "p_slot active"
+					}
+				}
+				if( size == 'large' ){
+					if( dom_e.dataset.size == size && dom_e.dataset.park == 0){
+						dom_e.attributes["class"].value = "p_slot active"
+					}
+				}
+			})
+			document.getElementById('parking_lot').attributes["class"].value = 'show'
+			document.getElementById('entering_panel').attributes["class"].value = 'panel hide'
+		}
+			
+		closePanel = e => {
+			var panel = e.target.dataset.panel
+			document.getElementById('parking_lot').attributes["class"].value = 'show'
+			document.getElementById(panel).attributes["class"].value = 'panel hide'
+		}
+			
+		showParkSchema = e => {
+			return <div >
+				<h1 class="main_h">Parking System <small> by XYZ Company Inc. &copy; 2021-2028</small> <CloseWelcome /></h1>
+				<br />
+				<br />
+				<div id="entrance_panel" class="panel">
+					<div class="big_btn" onClick={this.showEnteringPanel}>Vehicle Entering</div>
+					<div class="big_btn" onClick={this.showExitPanel}>Vehicle Leaving</div>
+				</div>
+				<div id="entering_panel" class="panel">
+					<div class="big_btn" data-size="small" onClick={this.scanParkingSlot}>Small</div>
+					<div class="big_btn" data-size="medium" onClick={this.scanParkingSlot}>Medium</div>
+					<div class="big_btn" data-size="large" onClick={this.scanParkingSlot}>Large</div>
+					<div class="big_btn" data-panel="entering_panel" onClick={this.closePanel}>Close Panel</div>
+				</div>
+				<div id="exit_panel" class="panel">
+					<div class="big_btn flex_row">
+						<input type="text" id="exit_parking_code" placeholder="Enter Parking CODE" />
+						<button onClick={this.unparkSlot}>Un-Park Space</button>
+					</div>
+					<div class="big_btn" onClick={this.showParkinglot}>Select Parking Slot to Un-Park</div>
+				</div>
+				<div id="parking_lot" class="">
+					<div id="entrance_1" class="entrance" initzone="1,2" secondzone="3,5,6,7" onClick={this.showEntrancePanel}>
+						<div id="parking_attendant" class="booth"></div> Ent 1
+					</div>
+					<div id="entrance_2" class="entrance" initzone="6,7" secondzone="2,3,5,8" onClick={this.showEntrancePanel}>
+						<div id="parking_attendant" class="booth"></div> Ent 2
+					</div>
+					<div id="entrance_3" class="entrance" initzone="4,8" secondzone="3,7" onClick={this.showEntrancePanel}>
+						<div id="parking_attendant" class="booth2"></div> Ent 3
+					</div>
+					<div id="quad_1" class="quad">
+						<div id="zone_1" class="zone"> 
+							<div id="zone_1_left" class="zone_lane">
+								<div class="p_slot" id="slot_1" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_2" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_3" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_4" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_5" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_6" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_7" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_8" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_9" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_10" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+							<div id="zone_1_right" class="zone_lane">
+								<div class="p_slot" id="slot_11" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_12" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_13" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_14" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_15" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_16" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_17" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_18" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_19" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_20" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+						</div>
+						<div id="zone_2" class="zone"> 
+							<div id="zone_2_left" class="zone_lane">
+								<div class="p_slot" id="slot_21" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_22" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_23" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_24" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_25" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_26" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_27" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_28" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_29" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_30" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+							<div id="zone_2_right" class="zone_lane">
+								<div class="p_slot" id="slot_31" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_32" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_33" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_34" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_35" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_36" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_37" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_38" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_39" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_40" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+						</div>
+					</div>
+					<div id="quad_2" class="quad">
+						<div id="zone_3" class="zone"> 
+							<div id="zone_3_left" class="zone_lane">
+								<div class="p_slot" id="slot_41" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_42" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_43" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_44" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_45" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_46" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_47" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_48" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_49" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_50" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+							<div id="zone_3_right" class="zone_lane">
+								<div class="p_slot" id="slot_51" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_52" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_53" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_54" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_55" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_56" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_57" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_58" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_59" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_60" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+						</div>
+						<div id="zone_4" class="zone"> 
+							<div id="zone_4_left" class="zone_lane">
+								<div class="p_slot" id="slot_41" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_42" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_43" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_44" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_45" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_46" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_47" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_48" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_49" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_50" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+							<div id="zone_4_right" class="zone_lane">
+								<div class="p_slot" id="slot_51" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_52" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_53" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_54" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_55" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_56" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_57" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_58" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_59" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_60" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+						</div>
+					</div>
+					<div id="quad_3" class="quad">
+						<div id="zone_5" class="zone"> 
+							<div id="zone_5_left" class="zone_lane">
+								<div class="p_slot" id="slot_41" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_42" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_43" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_44" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_45" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_46" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_47" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_48" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_49" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_50" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+							<div id="zone_5_right" class="zone_lane">
+								<div class="p_slot" id="slot_51" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_52" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_53" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_54" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_55" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_56" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_57" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_58" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_59" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_60" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+						</div>
+						<div id="zone_6" class="zone"> 
+							<div id="zone_6_left" class="zone_lane">
+								<div class="p_slot" id="slot_41" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_42" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_43" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_44" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_45" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_46" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_47" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_48" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_49" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_50" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+							<div id="zone_6_right" class="zone_lane">
+								<div class="p_slot" id="slot_51" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_52" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_53" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_54" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_55" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_56" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_57" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_58" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_59" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_60" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+						</div>
+					</div>
+					<div id="quad_4" class="quad">
+						<div id="zone_7" class="zone"> 
+							<div id="zone_7_left" class="zone_lane">
+								<div class="p_slot" id="slot_41" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_42" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_43" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_44" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_45" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_46" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_47" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_48" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_49" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_50" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+							<div id="zone_7_right" class="zone_lane">
+								<div class="p_slot" id="slot_51" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_52" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_53" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_54" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_55" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_56" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_57" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_58" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_59" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_60" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+						</div>
+						<div id="zone_8" class="zone"> 
+							<div id="zone_8_left" class="zone_lane">
+								<div class="p_slot" id="slot_41" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_42" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_43" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_44" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_45" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_46" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_47" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_48" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_49" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_50" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+							<div id="zone_8_right" class="zone_lane">
+								<div class="p_slot" id="slot_51" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_52" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_53" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_54" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_55" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_56" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_57" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_58" data-time="0"  data-park="0"  data-size="medium" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_59" data-time="0"  data-park="0"  data-size="large" onClick={this.handleClick}></div>
+								<div class="p_slot" id="slot_60" data-time="0"  data-park="0"  data-size="small" onClick={this.handleClick}></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		
+		render(){
+			return this.showParkSchema()
+		}
+	}
+
+	ReactDOM.render(<ParkingSystem />,document.getElementById('Main_view'))
+
+	var el = document.querySelectorAll('.p_slot');
+	el.forEach(dom_e => {
+		dom_e.innerHTML = dom_e.id + ' : <b>' + dom_e.dataset.size[0] + '</b>'
+	})
+	</script>
+	<br><br>
+</body>
+</html>
